@@ -1,2 +1,3 @@
-# demo_maps_websocket_locations
-SPA to mark locations on a map that change their data via websocket
+# IoT Machine Monitor
+
+A real-time application for visualizing and monitoring IoT connected devices on a map.
