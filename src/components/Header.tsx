@@ -30,15 +30,19 @@ export default function Header({
               IoT Machine Monitor
             </h1>
             <div className="flex items-center gap-4">
-              <span className="text-sm">{"Live updates:"}</span>
-              <div
-                className={`h-2 w-2 rounded-full ${
-                  isConnected ? "bg-green-500" : "bg-red-500"
-                }`}
-              ></div>
-              <span className="text-sm">
-                {isConnected ? "Connected" : "Disconnected"}
-              </span>
+              <div className="hidden sm:block">
+                <span className="text-sm">{"Live updates:"}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div
+                  className={`h-2 w-2 rounded-full animate-pulse ${
+                    isConnected ? "bg-green-500" : "bg-red-500"
+                  }`}
+                />
+                <span className="text-sm">
+                  {isConnected ? "Connected" : "Disconnected"}
+                </span>
+              </div>
               {lastUpdate && (
                 <div className="flex items-center gap-2">
                   <div

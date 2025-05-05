@@ -1,4 +1,5 @@
 import { WsEvent, wsEventSchema } from "../types/machine";
+import { WS_URL } from "../config";
 
 export type MessageCallback = (event: WsEvent) => void;
 

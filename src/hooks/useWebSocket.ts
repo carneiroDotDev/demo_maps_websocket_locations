@@ -39,7 +39,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     // List to mssgs
     webSocketService.addMessageListener(handleMessage);
 
-    if (autoConnect) {
+    if (autoConnect && !isConnected) {
       connect();
 
       // Tobe Initialize WS - not sure if setTimeout needed
@@ -51,7 +51,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     return () => {
       webSocketService.removeMessageListener(handleMessage);
     };
-  }, [handleMessage, connect, autoConnect]);
+  }, []);
 
   return {
     lastEvent,

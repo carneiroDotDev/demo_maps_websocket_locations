@@ -1,4 +1,5 @@
 import { Machine, machinesSchema } from "../types/machine";
+import { API_BASE_URL } from "../config";
 
 export async function fetchMachines(): Promise<Machine[]> {
   try {

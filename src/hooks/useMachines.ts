@@ -7,7 +7,7 @@ import { useCallback, useId, useState } from "react";
 export function useMachines() {
   const queryClient = useQueryClient();
   const [notifications, setNotifications] = useState<
-    Array<{ id: string; message: string; timestamp: Date }>
+    Array<{ id: string; message: string; timestamp: Date; change: string }>
   >([]);
 
   // Fetch machines data
@@ -31,17 +31,10 @@ export function useMachines() {
       console.log("Event Type:", event.type);
       console.log("Machine ID:", event?.data?.machineId || "Not specified");
       console.log("Timestamp:", event?.data?.timestamp || "Not provided");
-      console.log(
-        "Data:",
-        event.data ? JSON.stringify(event.data, null, 2) : "No data"
-      );
+      console.log("Data:", event.data ? JSON.stringify(event.data) : "No data");
       console.log("========================================");
 
-      if (
-        event.type === "machine_update" &&
-        event?.data?.machineId &&
-        event.data
-      ) {
+      if (event.type === "event" && event?.data?.machineId && event.data) {
         // Get current machines data
         const currentMachines =
           queryClient.getQueryData<Machine[]>(["machines"]) || [];
@@ -71,7 +64,7 @@ export function useMachines() {
           const changedProperties = Object.keys(event.data as object);
           changedProperties.forEach((prop) => {
             console.log(
-              `- ${prop}: ${previousMachine[prop as keyof Machine]} → ${
+              `- ${prop}: ${previousMachine[prop as keyof Machine]} -> ${
                 (event.data as Record<string, unknown>)[prop]
               }`
             );
@@ -79,29 +72,28 @@ export function useMachines() {
 
           queryClient.setQueryData(["machines"], updatedMachines);
 
-          setNotifications((prev) => [
+          setNotifications(() => [
             {
               id: notificationId,
               message: `Machine ${updatedMachines[machineIndex].name} updated`,
+              change: `Status change: from ${previousMachine.status} to ${event.data?.status}`,
               timestamp: new Date(),
             },
-            ...prev.slice(0, 9), // 10 notifications max
           ]);
         }
       }
     },
     [queryClient, notificationId]
   );
+  console.log("notificationsState ->", notifications);
 
   // WebSocket connection
   const { isConnected } = useWebSocket({
     onMessage: handleWsMessage,
   });
 
-  const removeNotification = useCallback((id: string) => {
-    setNotifications((prev) =>
-      prev.filter((notification) => notification.id !== id)
-    );
+  const removeNotification = useCallback(() => {
+    setNotifications([]);
   }, []);
 
   return {

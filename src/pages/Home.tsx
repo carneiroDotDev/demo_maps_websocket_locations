@@ -5,6 +5,7 @@ import MachineCard from "../components/MachineCard";
 import Header from "../components/Header";
 import { useMachines } from "../hooks/useMachines";
 import { Machine, MachineStatus } from "../types/machine";
+import { X } from "lucide-react";
 
 export default function Home() {
   const [selectedMachine, setSelectedMachine] = useState<Machine | null>(null);
@@ -12,13 +13,7 @@ export default function Home() {
     machines,
     isLoading,
     isError,
-    notifications = [
-      {
-        id: "Test-ID",
-        message: "Testing message",
-        timestamp: new Date(),
-      },
-    ],
+    notifications,
     removeNotification,
     isConnected,
   } = useMachines();
@@ -144,24 +139,25 @@ export default function Home() {
         )}
       </main>
 
-      {/* Tobe finished - Notifications */}
+      {/* Tobe extracted to new component - Notifications */}
       <div className="fixed bottom-4 right-4 flex flex-col gap-2 z-50 max-w-md">
         {notifications.map((notification) => (
           <div
             key={notification.id}
-            className="bg-primary-500 text-white p-4 rounded-md shadow-lg flex items-start gap-3"
+            className="bg-amber-300 text-black p-4 rounded-md shadow-lg flex items-start gap-3"
           >
             <div className="flex-1">
               <p className="text-sm font-medium">{notification.message}</p>
+              <p className="text-xs mt-1 font-medium">{notification.change}</p>
               <p className="text-xs mt-1 opacity-80">
                 {notification.timestamp.toLocaleTimeString()}
               </p>
             </div>
             <button
-              onClick={() => removeNotification(notification.id)}
-              className="text-white/80 hover:text-white"
+              onClick={removeNotification}
+              className="text-black/80 hover:text-black/50 cursor-pointer"
             >
-              ✕
+              <X className="h-4 w-4" />
             </button>
           </div>
         ))}

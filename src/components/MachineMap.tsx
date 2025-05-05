@@ -33,7 +33,7 @@ function SetBoundsToMachines({ machines }: { machines: Machine[] }) {
         console.error("Error setting map bounds:", error);
       }
     } else {
-      map.setView([51.505, -0.09], 10);
+      map.setView([48.09, 11.52], 4);
     }
   }, [machines, map]);
 
@@ -119,7 +119,7 @@ export default function MachineMap({
         className="w-full h-full min-h-[400px]"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          attribution="Luiz Carneiro"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
