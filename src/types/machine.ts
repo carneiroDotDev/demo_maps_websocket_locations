@@ -9,6 +9,11 @@ export enum MachineStatus {
   IDLE = "idle",
 }
 
+export enum wsEventTypes {
+  EVENT = "event",
+  KEEP_ALIVE = "keep-alive",
+}
+
 // For Ui filtering
 export const MACHINE_STATUSES = Object.values(MachineStatus);
 
@@ -51,7 +56,7 @@ export const WsDataSchema = z.object({
 
 // Schema for WebSocket
 export const wsEventSchema = z.object({
-  type: z.string(),
+  type: z.enum([wsEventTypes.EVENT, wsEventTypes.KEEP_ALIVE]),
   data: WsDataSchema.optional(),
 });
 
@@ -60,6 +65,23 @@ export const wsInitSchema = z.object({
   type: z.literal("init"),
 });
 
+// For the endpoint /machine/:id
+export const machineEventSchema = z.object({
+  timestamp: z.string(),
+  status: z.enum([
+    MachineStatus.RUNNING,
+    MachineStatus.FAILED,
+    MachineStatus.FINISHED,
+    MachineStatus.IDLE,
+  ]),
+  machineId: z.string(),
+});
+
+export const machineDetailsSchema = machineSchema.extend({
+  last_events: z.array(machineEventSchema),
+});
+
 export type Machine = z.infer<typeof machineSchema>;
 export type WsEvent = z.infer<typeof wsEventSchema>;
 export type WsInit = z.infer<typeof wsInitSchema>;
+export type MachineDetails = z.infer<typeof machineDetailsSchema>;

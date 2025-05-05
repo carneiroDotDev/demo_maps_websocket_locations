@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import MachineMap from "../components/MachineMap";
 import MachineDetails from "../components/MachineDetails";
 import MachineCard from "../components/MachineCard";
 import Header from "../components/Header";
+import Notifications from "../components/Notifications";
 import { useMachines } from "../hooks/useMachines";
 import { Machine, MachineStatus } from "../types/machine";
-import { X } from "lucide-react";
 
 export default function Home() {
   const [selectedMachine, setSelectedMachine] = useState<Machine | null>(null);
@@ -24,7 +24,6 @@ export default function Home() {
     MachineStatus.ALL
   );
 
-  // Update the last update timestamp when notifications change
   useEffect(() => {
     if (notifications.length > 0) {
       setLastUpdate(new Date());
@@ -39,18 +38,33 @@ export default function Home() {
     setSelectedMachine(null);
   }, []);
 
-  // Tobe in a custom hook as well? - useMachineFilter or smt
-  const filteredMachines = machines.filter((machine) => {
-    if (floorFilter !== null && machine.floor !== floorFilter) {
-      return false;
-    }
+  const filteredMachines = useMemo(() => {
+    return machines.filter((machine) => {
+      if (floorFilter !== null && machine.floor !== floorFilter) {
+        return false;
+      }
 
-    if (statusFilter !== MachineStatus.ALL && machine.status !== statusFilter) {
-      return false;
-    }
+      if (
+        statusFilter !== MachineStatus.ALL &&
+        machine.status !== statusFilter
+      ) {
+        return false;
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }, [machines, floorFilter, statusFilter]);
+
+  const machineList = useMemo(() => {
+    return filteredMachines.map((machine) => (
+      <MachineCard
+        key={machine.id}
+        machine={machine}
+        isSelected={selectedMachine?.id === machine.id}
+        onSelect={handleSelectMachine}
+      />
+    ));
+  }, [filteredMachines, selectedMachine, handleSelectMachine]);
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -99,14 +113,7 @@ export default function Home() {
                 <div className="mt-4">
                   <h2 className="text-xl font-bold mb-2">All Machines</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredMachines.map((machine) => (
-                      <MachineCard
-                        key={machine.id}
-                        machine={machine}
-                        isSelected={selectedMachine?.id === machine.id}
-                        onSelect={handleSelectMachine}
-                      />
-                    ))}
+                    {machineList}
                   </div>
                 </div>
               </div>
@@ -139,29 +146,10 @@ export default function Home() {
         )}
       </main>
 
-      {/* Tobe extracted to new component - Notifications */}
-      <div className="fixed bottom-4 right-4 flex flex-col gap-2 z-50 max-w-md">
-        {notifications.map((notification) => (
-          <div
-            key={notification.id}
-            className="bg-amber-300 text-black p-4 rounded-md shadow-lg flex items-start gap-3"
-          >
-            <div className="flex-1">
-              <p className="text-sm font-medium">{notification.message}</p>
-              <p className="text-xs mt-1 font-medium">{notification.change}</p>
-              <p className="text-xs mt-1 opacity-80">
-                {notification.timestamp.toLocaleTimeString()}
-              </p>
-            </div>
-            <button
-              onClick={removeNotification}
-              className="text-black/80 hover:text-black/50 cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        ))}
-      </div>
+      <Notifications
+        notifications={notifications}
+        removeNotification={removeNotification}
+      />
     </div>
   );
 }

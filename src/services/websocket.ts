@@ -8,8 +8,17 @@ export class WebSocketService {
   private messageCallbacks: MessageCallback[] = [];
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
-  private reconnectInterval = 2000; // 2 seconds
+  private reconnectInterval = 2000; // milliseconds
   private reconnectTimeoutId: number | null = null;
+  private isInitialized = false;
+  private static instance: WebSocketService;
+
+  public static getInstance(): WebSocketService {
+    if (!WebSocketService.instance) {
+      WebSocketService.instance = new WebSocketService();
+    }
+    return WebSocketService.instance;
+  }
 
   public connect(): void {
     if (this.socket) {
@@ -41,6 +50,7 @@ export class WebSocketService {
     }
 
     this.reconnectAttempts = 0;
+    this.isInitialized = false;
   }
 
   /**
@@ -52,7 +62,7 @@ export class WebSocketService {
   }
 
   /**
-   * Remove a previously added callback function
+   * Clean callback function when unmounted
    * @param callback Function to remove
    */
   public removeMessageListener(callback: MessageCallback): void {
@@ -62,32 +72,23 @@ export class WebSocketService {
     }
   }
 
-  /**
-   * Initialize the WebSocket connection by sending the required init message
-   */
   public initialize(): void {
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify({ type: "init" }));
-      console.log("WebSocket initialized with init message");
-    } else {
-      // Try to reconnect and then initialize
-      if (!this.socket) {
-        this.connect();
-        // Set a timeout to try initializing again after connection
-        setTimeout(() => {
-          if (this.socket?.readyState === WebSocket.OPEN) {
-            this.socket.send(JSON.stringify({ type: "init" }));
-          }
-        }, 1000);
-      }
+    if (
+      this.isInitialized ||
+      !this.socket ||
+      this.socket.readyState !== WebSocket.OPEN
+    ) {
+      return;
     }
+
+    this.socket.send(JSON.stringify({ type: "init" }));
+    console.log("WebSocket initialized with init message");
+    this.isInitialized = true;
   }
 
   private handleOpen(): void {
     console.log("WebSocket connection established");
     this.reconnectAttempts = 0;
-
-    // Send initialization message
     this.initialize();
   }
 
@@ -106,6 +107,7 @@ export class WebSocketService {
   }
 
   private handleClose(event: CloseEvent): void {
+    this.isInitialized = false;
     if (event.code !== 1000) {
       this.attemptReconnect();
     }
@@ -118,6 +120,7 @@ export class WebSocketService {
       this.socket.close();
       this.socket = null;
     }
+    this.isInitialized = false;
     this.attemptReconnect();
   }
 
@@ -136,4 +139,4 @@ export class WebSocketService {
 }
 
 // Websocket service singleton
-export const webSocketService = new WebSocketService();
+export default WebSocketService.getInstance();

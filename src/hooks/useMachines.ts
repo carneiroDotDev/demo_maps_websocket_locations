@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchMachines } from "../services/api";
 import { Machine, WsEvent } from "../types/machine";
 import { useWebSocket } from "./useWebSocket";
-import { useCallback, useId, useState } from "react";
+import { useCallback, useState } from "react";
 
 export function useMachines() {
   const queryClient = useQueryClient();
@@ -20,8 +20,6 @@ export function useMachines() {
     queryKey: ["machines"],
     queryFn: fetchMachines,
   });
-
-  const notificationId = useId();
 
   // Handle WebSocket messages
   const handleWsMessage = useCallback(
@@ -45,11 +43,8 @@ export function useMachines() {
         );
 
         if (machineIndex !== -1) {
-          console.log(
-            `Updating machine ${currentMachines[machineIndex].name} with WebSocket data`
-          );
-
-          // Create a new array with the updated machine
+          //check if machine exists
+          // Create array with the updated machine
           const updatedMachines = [...currentMachines];
           const previousMachine = { ...updatedMachines[machineIndex] };
 
@@ -59,41 +54,36 @@ export function useMachines() {
             last_update: event?.data?.timestamp || new Date().toISOString(),
           };
 
-          // Log changes between previous and new state
-          console.log("Machine State Changes:");
-          const changedProperties = Object.keys(event.data as object);
-          changedProperties.forEach((prop) => {
-            console.log(
-              `- ${prop}: ${previousMachine[prop as keyof Machine]} -> ${
-                (event.data as Record<string, unknown>)[prop]
-              }`
-            );
-          });
-
           queryClient.setQueryData(["machines"], updatedMachines);
 
-          setNotifications(() => [
-            {
-              id: notificationId,
-              message: `Machine ${updatedMachines[machineIndex].name} updated`,
-              change: `Status change: from ${previousMachine.status} to ${event.data?.status}`,
-              timestamp: new Date(),
-            },
-          ]);
+          setNotifications((prevNot) =>
+            [
+              {
+                id: `machine-${updatedMachines[machineIndex].id}-${event.data?.status}-${event.data?.timestamp}`,
+                message: `Machine ${updatedMachines[machineIndex].name} updated`,
+                change: `Status change: from ${previousMachine.status} to ${event.data?.status}`,
+                timestamp: new Date(),
+              },
+              ...prevNot,
+            ].slice(0, 3)
+          );
         }
       }
     },
-    [queryClient, notificationId]
+    [queryClient]
   );
-  console.log("notificationsState ->", notifications);
 
   // WebSocket connection
   const { isConnected } = useWebSocket({
     onMessage: handleWsMessage,
   });
 
-  const removeNotification = useCallback(() => {
-    setNotifications([]);
+  const removeNotification = useCallback((notificationId: string) => {
+    setNotifications((prevNotifications) =>
+      prevNotifications.filter(
+        (notification) => notification.id !== notificationId
+      )
+    );
   }, []);
 
   return {

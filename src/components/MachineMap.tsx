@@ -9,7 +9,8 @@ function SetBoundsToMachines({ machines }: { machines: Machine[] }) {
   const map = useMap();
 
   useEffect(() => {
-    // Filter out machines without locations
+    // This is propabably not needed, but I assume latitude and longitude
+    // are not always available.
     const validMachines = machines.filter(
       (machine) =>
         machine.location &&
@@ -124,6 +125,7 @@ export default function MachineMap({
         />
 
         {/* This will fix the map limitss based on machines found */}
+        {/* This will also reset the map to the center once a machine changes - useEffect */}
         <SetBoundsToMachines machines={validMachines} />
 
         {/* Display markers for each machine */}

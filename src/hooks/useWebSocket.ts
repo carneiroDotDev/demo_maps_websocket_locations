@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { WsEvent } from "../types/machine";
-import { webSocketService, MessageCallback } from "../services/websocket";
+import webSocketService, { MessageCallback } from "../services/websocket";
 
 interface UseWebSocketOptions {
   onMessage?: MessageCallback;
@@ -36,22 +36,17 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   }, []);
 
   useEffect(() => {
-    // List to mssgs
+    // listening for messgs
     webSocketService.addMessageListener(handleMessage);
 
     if (autoConnect && !isConnected) {
       connect();
-
-      // Tobe Initialize WS - not sure if setTimeout needed
-      setTimeout(() => {
-        webSocketService.initialize();
-      }, 500);
     }
 
     return () => {
       webSocketService.removeMessageListener(handleMessage);
     };
-  }, []);
+  }, [autoConnect, isConnected, connect, handleMessage]);
 
   return {
     lastEvent,

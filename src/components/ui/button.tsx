@@ -10,12 +10,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary-500 text-white hover:bg-primary-600",
-        destructive:
-          "bg-red-500 text-white hover:bg-red-600",
-        outline:
-          "border border-gray-300 bg-white hover:bg-gray-100",
-        secondary:
-          "bg-gray-200 text-gray-900 hover:bg-gray-300",
+        destructive: "bg-red-500 text-white hover:bg-red-600",
+        outline: "border border-gray-300 bg-white hover:bg-gray-100",
+        secondary: "bg-gray-200 text-gray-900 hover:bg-gray-300",
         ghost: "hover:bg-gray-100",
         link: "text-primary-500 underline-offset-4 hover:underline",
       },
@@ -53,4 +50,4 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
-export { Button, buttonVariants };
+export { Button };
