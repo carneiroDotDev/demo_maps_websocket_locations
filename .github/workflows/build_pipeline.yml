@@ -18,6 +18,7 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
+    environment: dev
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -30,8 +31,13 @@ jobs:
         with:
           node-version: 22
 
+      - name: Create config.ts
+        run: |
+          echo "export const API_BASE_URL = '${{ secrets.API_BASE_URL }}';" > src/config.ts
+          echo "export const WS_URL = '${{ secrets.WS_URL }}';" >> src/config.ts
+
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build
         run: npm run build
