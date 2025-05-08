@@ -129,3 +129,15 @@ src/
 - **Status Monitoring**: Real-time machine status updates
 - **Responsive Design**: Mobile-first approach with TailwindCSS
 - **PWA Support**: Offline capability and installable app
+
+## Testing
+
+### Running Tests
+
+```bash
+# Run tests in watch mode
+npm test
+
+# Run tests with coverage report
+npm run test:coverage
+```
