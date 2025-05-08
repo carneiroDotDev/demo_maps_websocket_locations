@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     outputs:
-      cache-key: ${{ steps.cache-deps.outputs.cache-hit }}
+      cache-key: ${{ steps.cache-deps.outputs.cache-key }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,14 +31,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
+      - name: Install dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: npm ci --legacy-peer-deps
+
+      - name: List files in workspace
+        run: ls -R
+
       - name: Create config.ts
         run: |
           echo "export const API_BASE_URL = '${{ secrets.API_BASE_URL }}';" > src/config.ts
           echo "export const WS_URL = '${{ secrets.WS_URL }}';" >> src/config.ts
-
-      - name: Install dependencies
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: npm ci --legacy-peer-deps
 
       - name: Upload workspace as artifact
         uses: actions/upload-artifact@v3
