@@ -6,6 +6,8 @@ import MachineCard from "../components/MachineCard";
 import Header from "../components/Header";
 import Notifications from "../components/Notifications";
 import { useMachines } from "../hooks/useMachines";
+import { useNotifications } from "../hooks/useNotifications";
+import { toast } from "sonner";
 import { Machine, MachineStatus } from "../types/machine";
 
 export default function Home() {
@@ -20,6 +22,7 @@ export default function Home() {
     removeNotification,
     isConnected,
   } = useMachines();
+  const { notification } = useNotifications();
 
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [floorFilter, setFloorFilter] = useState<number | null>(null);
@@ -42,6 +45,14 @@ export default function Home() {
       setLastUpdate(new Date());
     }
   }, [notifications]);
+
+  useEffect(() => {
+    if (notification) {
+      toast(notification.notification.title, {
+        description: notification.notification.body,
+      });
+    }
+  }, [notification]);
 
   const handleSelectMachine = useCallback(
     (machine: Machine) => {
