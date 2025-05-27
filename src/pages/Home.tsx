@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import MachineMap from "../components/MachineMap";
 import MachineDetails from "../components/MachineDetails";
 import MachineCard from "../components/MachineCard";
@@ -8,6 +9,8 @@ import { useMachines } from "../hooks/useMachines";
 import { Machine, MachineStatus } from "../types/machine";
 
 export default function Home() {
+  const { machineId } = useParams();
+  const navigate = useNavigate();
   const [selectedMachine, setSelectedMachine] = useState<Machine | null>(null);
   const {
     machines,
@@ -24,19 +27,34 @@ export default function Home() {
     MachineStatus.ALL
   );
 
+  // Effect to handle URL machine ID
+  useEffect(() => {
+    if (machineId && machines.length > 0) {
+      const machine = machines.find((m) => m.id === machineId);
+      if (machine) {
+        setSelectedMachine(machine);
+      }
+    }
+  }, [machineId, machines]);
+
   useEffect(() => {
     if (notifications.length > 0) {
       setLastUpdate(new Date());
     }
   }, [notifications]);
 
-  const handleSelectMachine = useCallback((machine: Machine) => {
-    setSelectedMachine(machine);
-  }, []);
+  const handleSelectMachine = useCallback(
+    (machine: Machine) => {
+      setSelectedMachine(machine);
+      navigate(`/machine/${machine.id}`);
+    },
+    [navigate]
+  );
 
   const handleCloseDetails = useCallback(() => {
     setSelectedMachine(null);
-  }, []);
+    navigate("/");
+  }, [navigate]);
 
   const filteredMachines = useMemo(() => {
     return machines.filter((machine) => {
